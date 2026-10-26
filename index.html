@@ -153,6 +153,206 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://nebulas-astra.github.io/2026-09-06_CRI-Middleware-%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E6%89%8B%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="星云nebulas">
+      <meta itemprop="description" content="有感而发，随兴而写">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="星云Nebulas的随记博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026-09-06_CRI-Middleware-%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E6%89%8B%E8%AE%B0/" class="post-title-link" itemprop="url">CRI Middleware 中间件文件格式手记</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-09-06 11:00:00" itemprop="dateCreated datePublished" datetime="2026-09-06T11:00:00+08:00">2026-09-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-10-26 17:12:26" itemprop="dateModified" datetime="2026-10-26T17:12:26+08:00">2026-10-26</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="CRI-Sofdec-Data-多路复用容器流"><a href="#CRI-Sofdec-Data-多路复用容器流" class="headerlink" title="CRI Sofdec Data 多路复用容器流"></a>CRI Sofdec Data 多路复用容器流</h2><ul>
+<li>典型扩展名：<code>.sfd</code><br>一种MPEG-1节目流（ISO&#x2F;IEC 11172-1）的变体。<br>共有两种已知的内部变体，下称v1和v2。</li>
+</ul>
+<p>该容器支持复用下述格式的内容流：</p>
+<ul>
+<li>视频流</li>
+<li><ul>
+<li>CRI Sofdec Video 视频流</li>
+</ul>
+</li>
+<li><ul>
+<li>MPEG-1 视频流（ISO&#x2F;IEC 11172-2）</li>
+</ul>
+</li>
+<li><ul>
+<li>MPEG-2 视频流（ISO&#x2F;IEC 13818-2）</li>
+</ul>
+</li>
+<li>音频流</li>
+<li><ul>
+<li>CRI Sofdec Audio 音频流</li>
+</ul>
+</li>
+<li><ul>
+<li>Dolby AC-3 音频流（ATSC A&#x2F;52）</li>
+</ul>
+</li>
+<li><ul>
+<li>CRI AHX 音频流（MPEG-1 Audio Layer II 兼容）（手册声明原生支持，但未见用例）</li>
+</ul>
+</li>
+<li><ul>
+<li>CRI AIX 多路音频容器流（一般是Dolby Digital布局）</li>
+</ul>
+</li>
+<li>特殊流</li>
+<li><ul>
+<li>CRITAG 扩展元数据流（只有字幕功能有简单的说明）</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>下述的容器结构说明中：<br><strong>包（pack）</strong>是ISO&#x2F;IEC 11172-1第2.4.3.2节所定义的两种结构之一。在本文内，包结构的前12个字节（即system_header和packet结构前的内容）略称为<strong>包头</strong>。<br><strong>系统头（system header）</strong>是ISO&#x2F;IEC 11172-1第2.4.3.2节所定义的另一种结构。在本文内，未声明存在系统头的包均不包含此结构。<br><strong>分组层（packet）</strong>是ISO&#x2F;IEC 11172-1第2.4.3.3节所定义的一种结构。在本文内，分组层内packet_data_byte字段之前的内容略称为<strong>分组头</strong>、每个分组层内所有packet_data_byte统称为<strong>载荷</strong>。</p>
+</blockquote>
+<p>该容器具有固定的包大小<code>0x800</code>。<br>该容器仅支持全局固定字节速率（CBR）。因此，在该容器中，所有包头内<code>mux_rate</code>字段的值均相等，且与所有系统头内<code>rate_bound</code>字段的值相等。此外，系统头中应设置<code>flxed_flag = &#39;1&#39;</code>。<br>该容器中所有音频流的STD buffer大小均为<code>0x0200</code>，在系统头中编码为<code>STD_buffer_bound_scale = &#39;0&#39;</code>、<code>STD_buffer_size_bound = &#39;0 0000 0000 0100&#39;</code>，在分组头中编码为<code>STD_buffer_scale = &#39;0&#39;</code>、<code>STD_buffer_size = &#39;0 0000 0000 0100&#39;</code>。<br>该容器中所有视频流的STD buffer大小均为<code>0xB800</code>，在系统头中编码为<code>STD_buffer_bound_scale = &#39;1&#39;</code>、<code>STD_buffer_size_bound = &#39;0 0000 0010 1110&#39;</code>，在分组头中编码为<code>STD_buffer_scale = &#39;1&#39;</code>、<code>STD_buffer_size = &#39;0 0000 0010 1110&#39;</code>。<br>该容器不使用系统头中的<code>CSPS_flag</code>、<code>system_audio_lock_flag</code>和<code>system_video_lock_flag</code>。它们均应设置为<code>&#39;0&#39;</code>。<br>该容器在终止码<code>&#123;0x00 0x00 0x01 0xB9&#125;</code>之后还应填充<code>0x7FC</code>字节长的<code>&#123;0xFF&#125;</code>，令文件大小为<code>0x800</code>的整倍数。<br>该容器中任何<code>stream_id</code> &#x3D; <code>0xBE</code>（padding stream）的分组，其分组头内均不使用<code>stuffing_byte</code>，且分组头的总长度恒定为<code>7</code>。</p>
+<h3 id="元数据包"><a href="#元数据包" class="headerlink" title="元数据包"></a>元数据包</h3><p>此容器流的前三个包用于记述元数据。这些包的结构如下所述。</p>
+<h4 id="音频流元数据包"><a href="#音频流元数据包" class="headerlink" title="音频流元数据包"></a>音频流元数据包</h4><p>此包是第一个元数据包。若容器中没有复用任何音频流，则此包应被省略。</p>
+<p>此包内存在系统头。其中：</p>
+<ul>
+<li><code>audio_bound</code> &#x3D; 总音频流数。</li>
+<li><code>video_bound</code> &#x3D; <code>0</code>。</li>
+<li>为每个音频流以各自的<code>stream_id</code>报告一次所需的STD buffer大小。</li>
+<li>系统头的总长度为 <code>12 + 3 * audio_bound</code>。</li>
+</ul>
+<p>此包的分组层为padding stream。</p>
+<h4 id="视频流元数据包"><a href="#视频流元数据包" class="headerlink" title="视频流元数据包"></a>视频流元数据包</h4><p>此包是第二个元数据包。若容器中没有复用任何视频流，则此包应被省略。</p>
+<p>此包内存在系统头。其中：</p>
+<ul>
+<li><code>audio_bound</code> &#x3D; <code>0</code>。</li>
+<li><code>video_bound</code> &#x3D; 总视频流数。</li>
+<li>为每个视频流以各自的<code>stream_id</code>报告一次所需的STD buffer大小。</li>
+<li>系统头的总长度为 <code>12 + 3 * video_bound</code>。</li>
+</ul>
+<p>此包的分组层为padding stream。</p>
+<h4 id="Sofdec元数据包"><a href="#Sofdec元数据包" class="headerlink" title="Sofdec元数据包"></a>Sofdec元数据包</h4><p>此包是第三个元数据包。</p>
+<p>此包的分组头中：</p>
+<ul>
+<li><code>stream_id</code> &#x3D; <code>0xBF</code> (private_stream_2)。</li>
+<li><code>packet_length</code> 恒定为 <code>0x07EE</code>。</li>
+<li>分组头的总长度为 <code>6</code>。</li>
+</ul>
+<p>载荷的第1个字节用于指示包内存放的Sofdec元数据版本。若使用Sofdec版本2，此字节应设为<code>0x08</code>。<br>载荷的第2~14个字节的每一位都应设为<code>&#39;0&#39;</code>。<br>从包内偏址0x0020开始的内容为Sofdec元数据。在Sofdec元数据中，所有未使用的字节都应设为<code>0x00</code>。</p>
+<p>Sofdec（v1）元数据的结构如下所述，所有变量均为小端序。其中，<code>unknown</code>指代内容定义尚不明确的片段。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line">struct sofdec_output_metadata_v1&#123;</span><br><span class="line">    uint8_t stream_lable[24]        = &quot;SofdecStream            &quot;;</span><br><span class="line">    uint8_t tools_version[2]        = &#123;SFD_MUX_LIB_INTER_MAJOR_VERSION, SFD_MUX_LIB_INTER_MINOR_VERSION&#125;; // old library dont have it</span><br><span class="line">    uint8_t padding[6] = &#123;0&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    uint8_t short_output_name[12];          // 文件名长度小于等于8时，扩展名为小写&quot;.sfd&quot;，文件名填0x20到长度8；</span><br><span class="line">                                            // 文件名长度大于8时，填入标准8.3格式</span><br><span class="line">    uint8_t file_generate_time[12];         // YYYYMMDDhhmm</span><br><span class="line">    uint8_t padding[8] = &#123;0&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    uint8_t tools_info_string[0x20];          // 构建器版本声明</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    uint32_t header_size = 0x800;</span><br><span class="line">    uint32_t pack_creation_type = 0;        // 若为可变包长度，则设为1（没见过）</span><br><span class="line">    uint32_t packet_length_field_size = 2;  </span><br><span class="line">    uint32_t packet_size = 0x800;</span><br><span class="line">    uint8_t  padding[0x20] = &#123;0&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    uint8_t total_stream_num;</span><br><span class="line">    uint8_t video_stream_num;</span><br><span class="line">    uint8_t audio_stream_num;</span><br><span class="line">    uint8_t private_stream_num;</span><br><span class="line">    uint32_t bitrate_of_system_stream;</span><br><span class="line">    uint32_t longest_audio_playbk_time;     // ms</span><br><span class="line">    uint32_t longest_video_playbk_time;     // ms</span><br><span class="line">    uint32_t maximum_video_frame;           // 单一流最大帧总数</span><br><span class="line">            // 扩展于2003-2005</span><br><span class="line">    uint32_t maximum_video_picture_size;</span><br><span class="line">    uint32_t average_video_picture_size;</span><br><span class="line">    uint8_t  padding[0x14] = &#123;0&#125;;</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">    uint8_t  comment[0x20] = &#123;0&#125;;           // 旧版用于输出完整文件名</span><br><span class="line">                                            // 一般留空</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    for(i = 0; i &lt; full_stream_num; i++)    // 为每个流记述一条</span><br><span class="line">        sofdec_element_metadata_v1;         // 一般记述顺序为：私用流（CRITAGS），视频流，音频流</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">struct sofdec_element_metadata_v1&#123;</span><br><span class="line">    uint8_t short_source_name[12];          // 文件名长度小于等于8时，扩展名为小写，文件名填0x20到长度8；</span><br><span class="line">                                            // 文件名长度大于8时，填入标准8.3格式</span><br><span class="line">    uint8_t source_last_edit_time[12];      // YYYYMMDDhhmm</span><br><span class="line">    uint8_t stream_id;</span><br><span class="line">    union &#123;</span><br><span class="line">        struct video_stream&#123;</span><br><span class="line">            uint8_t  codec_type;                // 见代码表</span><br><span class="line">            uint8_t  mark[2] = &#123;0xFF, 0xFF&#125;;</span><br><span class="line">            uint32_t video_width     : 12;</span><br><span class="line">            uint32_t video_higth     : 12;</span><br><span class="line">            uint32_t picture_rate    :  8;  // MPEG-1 vidoe 序列头字段</span><br><span class="line">                    // 扩展于2000-2002</span><br><span class="line">            uint8_t  YUV_Conversion_mode;       // 见代码表</span><br><span class="line">            uint8_t  picture_type;              // 见代码表</span><br><span class="line">            bool     fixed_bitrate_flag;        // uint8_t空间，最高位有效</span><br><span class="line">            bool     fixed_SHC_flag;            // uint8_t空间，最高位有效</span><br><span class="line">            uint8_t  advanced_feature;          // 见代码表</span><br><span class="line">            uint8_t  FX_type;                   // 见代码表</span><br><span class="line">            uint8_t  GOP_N;     // 两个连续I帧的间距</span><br><span class="line">            uint8_t  GOP_M;     // 两个连续I/P帧间的B帧数</span><br><span class="line">        &#125;</span><br><span class="line">        struct audio_stream&#123;</span><br><span class="line">            uint8_t  codec_type;            // 见代码表</span><br><span class="line">            uint8_t  layer = 0;             // 若音频流为MPEG/Audio，则记述音频层编号</span><br><span class="line">            uint8_t  audio_channels;        </span><br><span class="line">            uint32_t audio_sample_rate;     // Hz</span><br><span class="line">            uint8_t  padding[0x20] = &#123;0&#125;</span><br><span class="line">        &#125;</span><br><span class="line">        struct other_stream&#123;</span><br><span class="line">            uint8_t  padding[7] = &#123;0&#125;</span><br><span class="line">            uint8_t  padding[0x20] = &#123;0&#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Sofdec（v2）元数据的结构如下所述，未特殊声明的变量均为大端序。其中，<code>unknown</code>指代内容定义尚不明确的片段，<code>padding_to(i)</code>指代「在到达相对于结构起点的偏址<code>i</code>处之前的所有字节都为<code>0x00</code>」。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">sofdec_metadata_v2()&#123;</span><br><span class="line">    uint8_t stream_lable[24]  = &quot;SofdecStream2           &quot;;</span><br><span class="line">    uint8_t sofdec_metadata_version = 0x02;</span><br><span class="line">    uint8_t programer_type;   // 0x02 for &quot;Sofdec Multiplexer&quot;, 0x03 for &quot;Sofdec Craft&quot;</span><br><span class="line">    uint8_t version[4]        = &#123;SFD_MUX_LIB_INTER_MAJOR_VERSION, SFD_MUX_LIB_INTER_MINOR_VERSION&#125;;</span><br><span class="line">    uint8_t padding[4] = &#123;0&#125;;</span><br><span class="line">    uint8_t builder_version_string[32];     // 构建器版本声明</span><br><span class="line">    uint8_t padding[0x60] = &#123;0&#125;;</span><br><span class="line"></span><br><span class="line">    uint8_t full_stream_num;</span><br><span class="line">    uint8_t video_stream_num;</span><br><span class="line">    uint8_t audio_stream_num;</span><br><span class="line">    uint8_t other_stream_num;</span><br><span class="line">    uint8_t unknown[28];                    // 未确定内容定义</span><br><span class="line">    uint8_t padding[0x150] = &#123;0&#125;</span><br><span class="line"></span><br><span class="line">    for(i = 0; i &lt; audio_stream_num; i++)</span><br><span class="line">        audio_stream_metadata();</span><br><span class="line">    padding_to(0x39F);</span><br><span class="line">    for(i = 0; i &lt; video_stream_num; i++)</span><br><span class="line">        video_stream_metadata();</span><br><span class="line">    padding_to(0x7CF);</span><br><span class="line">    if(other_stream_num == 1)</span><br><span class="line">        uint8_t flag = 0xBF;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">audio_stream_metadata()&#123;        // 16字节长</span><br><span class="line">    uint8_t stream_id;</span><br><span class="line">    uint8_t channel_cound :4;</span><br><span class="line">    uint8_t substream_count :4;</span><br><span class="line">    uint8_t total_channel_count :4;</span><br><span class="line">    uint8_t unknown :4;</span><br><span class="line">    uint16_t audio_sample_rate;</span><br><span class="line">    uint8_t unknown[11];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">video_stream_metadata()&#123;        // 推测为48字节长</span><br><span class="line">    uint8_t stream_id;</span><br><span class="line">    uint8_t unknown;</span><br><span class="line">    uint16_t video_width;</span><br><span class="line">    uint16_t video_higth;</span><br><span class="line">    uint8_t unknown[0x2A];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="内容流封装包"><a href="#内容流封装包" class="headerlink" title="内容流封装包"></a>内容流封装包</h3><p>在元数据包之后是封装了实际内容流的包，它们均不包含系统头。<br>这些包的结构按照流的类型分为三种，其结构如下所述。<br>除扩展元数据流包之外，所有封装了内容流的包均以其解码时标（DTS）为索引升序排列，即使分组头中未编码DTS也是如此。<br>若其中没有任何可用于编码DTS或PTS的数据，则此包排列在此子流的下一个子包之前。<br>若多个包的索引值相同，这些包之间应以<code>stream_id</code>从小到大排序。</p>
+<h4 id="扩展元数据流包"><a href="#扩展元数据流包" class="headerlink" title="扩展元数据流包"></a>扩展元数据流包</h4><p>这些包用于承载 CRITAG 扩展元数据流。它们按照先后顺序连续排列在三个元数据包之后、任何音视频包之前。</p>
+<p>此包的第一个分组层中：</p>
+<ul>
+<li><code>stream_id</code> &#x3D; <code>0xBF</code> (private_stream_2)。</li>
+<li>分组头的总长度为 <code>6</code>。</li>
+<li>最多包含<code>0x7EE</code>字节载荷。即，<code>packet_length</code>最大为<code>0x07F5</code>。</li>
+</ul>
+<p>若第一个分组层的载荷总长度小于<code>0x7E8</code>，则此包内包含两个分组层。<br>此包的第二个分组层为padding stream。</p>
+<p>若第一个分组层的载荷总长度大于等于<code>0x7E8</code>但不足<code>0x7EE</code>，则缺少的字节作为此包的前导0xFF填充。</p>
+<h4 id="音频流子包"><a href="#音频流子包" class="headerlink" title="音频流子包"></a>音频流子包</h4><p>这些包用于承载音频流。所有子包均有DTS&#x3D;PTS。</p>
+<p>此类包一般包含两个分组层。<br>第一个分组层中：</p>
+<ul>
+<li>不编码<code>stuffing_byte</code>。</li>
+<li>编码STD buffer。</li>
+<li>编码PTS值，不使用DTS。</li>
+<li>分组头的总长度固定为<code>13</code>。</li>
+<li>最多包含<code>0x7E0</code>字节载荷。即，<code>packet_length</code>最大为<code>0x07E7</code>。<br>第二个分组层为padding stream。</li>
+<li>若第一个分组层的载荷长度为<code>0x7E0</code>字节，则第二个分组层的内容为<code>&#123;0x00 0x00 0x01 0xBE 0x00 0x01 0x0F&#125;</code>。</li>
+</ul>
+<h4 id="视频流子包"><a href="#视频流子包" class="headerlink" title="视频流子包"></a>视频流子包</h4><p>这些包用于承载视频流。</p>
+<p>在此类包的分组层中：</p>
+<ul>
+<li>编码STD buffer。</li>
+<li>若载荷中不包含<code>picture_head</code>，则编码<code>9</code>字节长的<code>stuffing_byte</code>。</li>
+<li>若载荷中包含的第一个<code>pitcure_head</code>声明其为I&#x2F;P帧，则编码PTS值和DTS值，不编码<code>stuffing_byte</code>。</li>
+<li>若载荷中包含的第一个<code>pitcure_head</code>声明其为B帧，则编码PTS值和<code>5</code>字节长的<code>stuffing_byte</code>。</li>
+<li>分组头的总长度固定为<code>18</code>。</li>
+<li>最多包含<code>0x7E2</code>字节载荷。即，<code>packet_length</code>最大为<code>0x07EE</code>。</li>
+</ul>
+<p>当到达视频流末尾时，载荷长度可能不足<code>0x7DB</code>。此时，对应的包中应存在第二个分组层，为padding stream。<br>若载荷长度介于<code>0x7DB</code>和<code>0x7E2</code>之间，则不足的字节填在分组头中stuffing位置。</p>
+<h3 id="数据字段计算方式"><a href="#数据字段计算方式" class="headerlink" title="数据字段计算方式"></a>数据字段计算方式</h3><p>音频流各参数由其各自的源比特<code>B</code>率求定。单位<code>bit/s</code></p>
+<ul>
+<li>CRI Sofdec Audio音频流的源比特率为 <code>4.5 * 声道数 * 采样率</code>。</li>
+<li>Dobly AC-3音频流的源比特率见 <code>ATSC A/52 (AC-3) 5.4.4.1 Table 5.18</code>。</li>
+<li>CRI AIX 多路音频容器流的源比特率为 <code>Σᵢ (4.5 * 声道数ᵢ * 采样率ᵢ) + 7680.0</code>。</li>
+</ul>
+<p>整体数据速率的精确值记述在Sofdec元数据中的<code>bitrate_of_system_stream</code>字段，其值为各子流的数据速率之和，四舍五入取整。</p>
+<ul>
+<li>视频流的数据速率被视为<code>0xCAF8F4</code>。</li>
+<li>音频流的数据速率为<code>B/8 × 2048/2016</code>。</li>
+</ul>
+<p><code>mux_rate</code>字段的值应以ISO&#x2F;IEC 11172-1第2.4.4.2节所述，为<code>整体数据速率 / 50</code>向上取整。</p>
+<p>SCR值应以整体数据速率求出。即，对于整个容器流都有<code>tm(i) = (i / 整体数据速率) × 90000</code>。</p>
+<p>PTS值及DTS值应以ISO&#x2F;IEC 11172-1第2.4.4.3节所述的公式求得。<br>对于视频流子包：</p>
+<ul>
+<li><code>tpₙ(k)</code>以<strong>演播顺序</strong>的帧时间求得。即，对应帧在对应视频流数据中播放的顺序 &#x2F; 对应视频流的帧速率。</li>
+<li><code>tdₙ(k)</code>以<strong>位流顺序</strong>的帧时间求得。即，对应帧在对应视频流数据中编码的顺序 &#x2F; 对应视频流的帧速率。<br>对于音频流子包：</li>
+<li><code>Pₙ(k)</code>为该子包在对应音频流的所有子包中的序号。第一个包的序号为0。</li>
+<li><code>tpₙ(k) = 包序号 * 2016 / (B / 8)</code>，单位为秒。</li>
+</ul>
+<h2 id="CRI-Sofdec-Video-视频流"><a href="#CRI-Sofdec-Video-视频流" class="headerlink" title="CRI Sofdec Video 视频流"></a>CRI Sofdec Video 视频流</h2><ul>
+<li>典型扩展名：<code>.sfv</code><br>一种MPEG-1视频流（ISO&#x2F;IEC 11172-2）。使用CRI自定义Quantization Matrix。</li>
+</ul>
+<h2 id="CRI-Sofdec-Audio-音频流"><a href="#CRI-Sofdec-Audio-音频流" class="headerlink" title="CRI Sofdec Audio 音频流"></a>CRI Sofdec Audio 音频流</h2><ul>
+<li>典型扩展名：<code>.sfa</code><br>实为具有特定约束的[<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/ADX_(file_format)">https://en.wikipedia.org/wiki/ADX_(file_format)</a> CRI ADX音频流]。音频数据应使用CRI ADX ADPCM编码。<br>应满足的约束为：实际音频数据从0x120开始。即，0x02处变量设为0x11C，实际音频数据前的填充段之结束标志<code>(c)CRI</code>开始于0x11A。</li>
+</ul>
+<h2 id="CRITAG-扩展元数据流"><a href="#CRITAG-扩展元数据流" class="headerlink" title="CRITAG 扩展元数据流"></a>CRITAG 扩展元数据流</h2><p>实际名称不明。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://nebulas-astra.github.io/2026-02-04_Elements-Book-0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1281,7 +1481,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
